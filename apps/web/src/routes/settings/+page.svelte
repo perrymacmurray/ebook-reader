@@ -24,6 +24,7 @@
     fontSize$,
     furiganaStyle$,
     hideFurigana$,
+    wanikaniToken$,
     hideSpoilerImage$,
     lineHeight$,
     manualBookmark$,
@@ -140,6 +141,7 @@
       bind:blurImageMode={$hideSpoilerImageMode$}
       bind:hideFurigana={$hideFurigana$}
       bind:furiganaStyle={$furiganaStyle$}
+      bind:wanikaniToken={$wanikaniToken$}
       bind:writingMode={$writingMode$}
       bind:enableReaderWakeLock={$enableReaderWakeLock$}
       bind:showCharacterCounter={$showCharacterCounter$}

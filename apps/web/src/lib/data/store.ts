@@ -45,6 +45,7 @@ import { map } from 'rxjs';
 import { BookReaderAvailableKeybind, type BookReaderKeybindMap } from './book-reader-keybind';
 import { DatabaseService } from './database/books-db/database.service';
 import { createBooksDb } from './database/books-db/factory';
+import { Furigana } from './furigana';
 import { FuriganaStyle } from './furigana-style';
 import { writableBooleanLocalStorageSubject } from './internal/writable-boolean-local-storage-subject';
 import { writableNumberLocalStorageSubject } from './internal/writable-number-local-storage-subject';
@@ -73,11 +74,15 @@ export const hideSpoilerImageMode$ = writableStringLocalStorageSubject<BlurMode>
   'hideSpoilerImageMode',
   BlurMode.AFTER_TOC
 );
-export const hideFurigana$ = writableBooleanLocalStorageSubject()('hideFurigana', false);
+export const hideFurigana$ = writableStringLocalStorageSubject<Furigana>()(
+  'hideFurigana',
+  Furigana.Show
+);
 export const furiganaStyle$ = writableStringLocalStorageSubject<FuriganaStyle>()(
   'furiganaStyle',
   FuriganaStyle.Partial
 );
+export const wanikaniToken$ = writableStringLocalStorageSubject()('wanikaniToken', '');
 export const writingMode$ = writableStringLocalStorageSubject<WritingMode>()(
   'writingMode',
   'vertical-rl'

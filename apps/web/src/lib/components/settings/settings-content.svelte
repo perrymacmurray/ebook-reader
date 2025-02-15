@@ -23,6 +23,7 @@
   import { BlurMode } from '$lib/data/blur-mode';
   import { dialogManager } from '$lib/data/dialog-manager';
   import { LocalFont } from '$lib/data/fonts';
+  import { Furigana } from '$lib/data/furigana';
   import { FuriganaStyle } from '$lib/data/furigana-style';
   import { logger } from '$lib/data/logger';
   import { MergeMode } from '$lib/data/merge-mode';
@@ -66,9 +67,11 @@
 
   export let blurImageMode: string;
 
-  export let hideFurigana: boolean;
+  export let hideFurigana: Furigana;
 
   export let furiganaStyle: FuriganaStyle;
+
+  export let wanikaniToken: string;
 
   export let writingMode: WritingMode;
 
@@ -167,6 +170,21 @@
     thickBorders: true,
     showIcons: true
   }));
+
+  const optionsForFurigana: ToggleOption<Furigana>[] = [
+    {
+      id: Furigana.Show,
+      text: 'Off'
+    },
+    {
+      id: Furigana.Hide,
+      text: 'On'
+    },
+    {
+      id: Furigana.WaniKani,
+      text: 'WaniKani'
+    }
+  ];
 
   const optionsForFuriganaStyle: ToggleOption<FuriganaStyle>[] = [
     {
@@ -306,6 +324,7 @@
   );
 
   let showSpinner = false;
+  let furiganaTooltip = '';
   let furiganaStyleTooltip = '';
   let autoReplicationTypeTooltip = '';
   let trackerAutoPauseTooltip = '';
@@ -314,6 +333,17 @@
   $: wakeLockSupported = browser && 'wakeLock' in navigator;
   $: verticalMode = writingMode === 'vertical-rl';
   $: fontCacheSupported = browser && 'caches' in window;
+  $: switch (hideFurigana) {
+    case Furigana.Hide:
+      furiganaTooltip = 'Hide Furigana';
+      break;
+    case Furigana.Show:
+      furiganaTooltip = 'Show Furigana';
+      break;
+    default:
+      furiganaTooltip = 'Hide Furigana when kanji learned on WaniKani';
+      break;
+  }
   $: switch (furiganaStyle) {
     case FuriganaStyle.Hide:
       furiganaStyleTooltip = 'Always hidden';
@@ -628,15 +658,20 @@
         <ButtonToggleGroup options={optionsForBlurMode} bind:selectedOptionId={blurImageMode} />
       </SettingsItemGroup>
     {/if}
-    <SettingsItemGroup title="Hide furigana">
-      <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={hideFurigana} />
+    <SettingsItemGroup title="Hide furigana" tooltip={furiganaTooltip}>
+      <ButtonToggleGroup options={optionsForFurigana} bind:selectedOptionId={hideFurigana} />
     </SettingsItemGroup>
-    {#if hideFurigana}
+    {#if hideFurigana !== Furigana.Show}
       <SettingsItemGroup title="Hide furigana style" tooltip={furiganaStyleTooltip}>
         <ButtonToggleGroup
           options={optionsForFuriganaStyle}
           bind:selectedOptionId={furiganaStyle}
         />
+      </SettingsItemGroup>
+    {/if}
+    {#if hideFurigana === Furigana.WaniKani}
+      <SettingsItemGroup title="WaniKani Token">
+        <input type="text" class={inputClasses} bind:value={wanikaniToken} />
       </SettingsItemGroup>
     {/if}
     {#if statisticsEnabled}

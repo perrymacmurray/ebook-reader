@@ -9,6 +9,7 @@ import {
   filter,
   fromEvent,
   merge,
+  of,
   race,
   switchMap,
   take,
@@ -18,13 +19,16 @@ import {
   timer
 } from 'rxjs';
 
+import { Furigana } from '../../data/furigana';
 import { FuriganaStyle } from '../../data/furigana-style';
+import { knownKanji } from '$lib/functions/load-wanikani-data';
 import { nextChapter$ } from '$lib/components/book-reader/book-toc/book-toc';
 import { pulseElement } from '$lib/functions/range-util';
 import { toggleImageGalleryPictureSpoiler$ } from '$lib/components/book-reader/book-reader-image-gallery/book-reader-image-gallery';
 
 export function reactiveElements(
   document: Document,
+  hideFurigana: Furigana,
   furiganaStyle: FuriganaStyle,
   hideSpoilerImage: boolean,
   isExtendedMode: boolean
@@ -35,7 +39,7 @@ export function reactiveElements(
   return (contentEl: HTMLElement) =>
     merge(
       anchorTagDocumentListener(contentEl),
-      rubyTagListener(contentEl, furiganaStyle),
+      rubyTagListener(contentEl, hideFurigana, furiganaStyle),
       spoilerImageDocumentListener(contentEl),
       openImageInNewTab(contentEl, hideSpoilerImage, isExtendedMode)
     );
@@ -55,15 +59,37 @@ function anchorTagListener(document: Document) {
   };
 }
 
-function rubyTagListener(contentEl: HTMLElement, furiganaStyle: FuriganaStyle) {
-  if (furiganaStyle === FuriganaStyle.Hide) {
+function elementReadable(el: HTMLElement): boolean {
+  const known = new Set(knownKanji ?? '');
+  const t = el.childNodes[0].nodeValue?.trim();
+
+  for (const char of t ?? '') {
+    if (!known.has(char)) return false;
+  }
+
+  return true;
+}
+
+function rubyTagListener(
+  contentEl: HTMLElement,
+  hideFurigana: Furigana,
+  furiganaStyle: FuriganaStyle
+) {
+  if (furiganaStyle === FuriganaStyle.Hide && hideFurigana !== Furigana.WaniKani) {
     return NEVER;
   }
 
   const isToggle = furiganaStyle === FuriganaStyle.Toggle;
   const rubyTags = Array.from(contentEl.getElementsByTagName('ruby'));
-  const obs$ = rubyTags.map((el) =>
-    isToggle
+  const obs$ = rubyTags.map((el) => {
+    if (hideFurigana === Furigana.WaniKani && !elementReadable(el))
+      return of(el).pipe(
+        tap(() => {
+          el.classList.add('reveal-rt');
+          el.classList.add('override-hide-rt');
+        })
+      );
+    return isToggle
       ? fromClickEvent(el).pipe(
           tap(() => {
             el.classList.toggle('reveal-rt');
@@ -74,8 +100,8 @@ function rubyTagListener(contentEl: HTMLElement, furiganaStyle: FuriganaStyle) {
           tap(() => {
             el.classList.add('reveal-rt');
           })
-        )
-  );
+        );
+  });
   return merge(...obs$);
 }
 

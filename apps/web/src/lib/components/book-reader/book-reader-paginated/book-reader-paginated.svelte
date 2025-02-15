@@ -5,6 +5,7 @@
   import type { BooksDbBookmarkData } from '$lib/data/database/books-db/versions/books-db';
   import { SECTION_CHANGE } from '$lib/data/events';
   import { isStoredFont } from '$lib/data/fonts';
+  import { Furigana } from '$lib/data/furigana';
   import { FuriganaStyle } from '$lib/data/furigana-style';
   import { logger } from '$lib/data/logger';
   import {
@@ -68,7 +69,7 @@
 
   export let hideSpoilerImage: boolean;
 
-  export let hideFurigana: boolean;
+  export let hideFurigana: Furigana;
 
   export let furiganaStyle: FuriganaStyle;
 
@@ -694,7 +695,7 @@
   class:book-content--avoid-page-break={avoidPageBreak}
   class:book-content--writing-vertical-rl={verticalMode}
   class:book-content--writing-horizontal-rl={!verticalMode}
-  class:book-content--hide-furigana={hideFurigana}
+  class:book-content--hide-furigana={hideFurigana !== Furigana.Show}
   class:book-content--hide-spoiler-image={hideSpoilerImage}
   class:book-content--furigana-style-hide={furiganaStyle === FuriganaStyle.Hide}
   class:book-content--furigana-style-partial={furiganaStyle === FuriganaStyle.Partial}
@@ -785,12 +786,12 @@
 
     :global(.book-content-container > *:not(.ttu-book-html-wrapper) > *:has(ruby):has(rt)),
     :global(
-        .book-content-container
-          > div.ttu-book-html-wrapper
-          > div.ttu-book-body-wrapper
-          > *
-          > *:has(ruby):has(rt)
-      ) {
+      .book-content-container
+        > div.ttu-book-html-wrapper
+        > div.ttu-book-body-wrapper
+        > *
+        > *:has(ruby):has(rt)
+    ) {
       padding-right: 10px !important;
     }
   }
@@ -798,12 +799,12 @@
   .book-content--writing-horizontal-rl {
     :global(.book-content-container > *:not(.ttu-book-html-wrapper) > *:has(ruby):has(rt)),
     :global(
-        .book-content-container
-          > div.ttu-book-html-wrapper
-          > div.ttu-book-body-wrapper
-          > *
-          > *:has(ruby):has(rt)
-      ) {
+      .book-content-container
+        > div.ttu-book-html-wrapper
+        > div.ttu-book-body-wrapper
+        > *
+        > *:has(ruby):has(rt)
+    ) {
       padding-top: 10px !important;
     }
   }

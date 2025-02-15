@@ -9,6 +9,7 @@
   import HtmlRenderer from '$lib/components/html-renderer.svelte';
   import type { BooksDbBookmarkData } from '$lib/data/database/books-db/versions/books-db';
   import { isStoredFont } from '$lib/data/fonts';
+  import { Furigana } from '$lib/data/furigana';
   import { FuriganaStyle } from '$lib/data/furigana-style';
   import { logger } from '$lib/data/logger';
   import {
@@ -74,7 +75,7 @@
 
   export let hideSpoilerImage: boolean;
 
-  export let hideFurigana: boolean;
+  export let hideFurigana: Furigana;
 
   export let furiganaStyle: FuriganaStyle;
 
@@ -663,7 +664,7 @@
   style:--book-content-child-height="{maxHeight || height}px"
   class:book-content--writing-vertical-rl={verticalMode}
   class:book-content--writing-horizontal-rl={!verticalMode}
-  class:book-content--hide-furigana={hideFurigana}
+  class:book-content--hide-furigana={hideFurigana !== Furigana.Show}
   class:book-content--hide-spoiler-image={hideSpoilerImage}
   class:book-content--furigana-style-hide={furiganaStyle === FuriganaStyle.Hide}
   class:book-content--furigana-style-partial={furiganaStyle === FuriganaStyle.Partial}

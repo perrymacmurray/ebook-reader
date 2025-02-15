@@ -37,7 +37,13 @@
 
 .book-content--hide-furigana.book-content--furigana-style-hide {
   :global(rt) {
-    display: none;
+    visibility: hidden;
+  }
+
+  :global(.override-hide-rt) {
+    :global(rt) {
+      visibility: visible;
+    }
   }
 }
 

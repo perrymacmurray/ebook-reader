@@ -4,6 +4,7 @@
     combineLatest,
     debounceTime,
     filter,
+    from,
     map,
     mergeMap,
     of,
@@ -12,11 +13,13 @@
     shareReplay,
     startWith,
     Subject,
+    switchMap,
     tap
   } from 'rxjs';
   import BookReaderContinuous from '$lib/components/book-reader/book-reader-continuous/book-reader-continuous.svelte';
   import { pxReader } from '$lib/components/book-reader/css-classes';
   import type { BooksDbBookmarkData } from '$lib/data/database/books-db/versions/books-db';
+  import { Furigana } from '$lib/data/furigana';
   import type { FuriganaStyle } from '$lib/data/furigana-style';
   import { ViewMode } from '$lib/data/view-mode';
   import { iffBrowser } from '$lib/functions/rxjs/iff-browser';
@@ -30,6 +33,7 @@
   import BookReaderPaginated from './book-reader-paginated/book-reader-paginated.svelte';
   import { enableReaderWakeLock$ } from '$lib/data/store';
   import { onDestroy } from 'svelte';
+  import { loadWanikaniData } from '$lib/functions/load-wanikani-data';
 
   export let htmlContent: string;
 
@@ -57,7 +61,7 @@
 
   export let hideSpoilerImage: boolean;
 
-  export let hideFurigana: boolean;
+  export let hideFurigana: Furigana;
 
   export let furiganaStyle: FuriganaStyle;
 
@@ -159,10 +163,14 @@
     )
   );
 
+  const wkPromise = hideFurigana === Furigana.WaniKani ? loadWanikaniData() : Promise.resolve();
+
   const reactiveElements$ = iffBrowser(() => of(document)).pipe(
-    mergeMap((document) => {
+    switchMap(() => from(wkPromise)),
+    mergeMap((ignored) => {
       const reactiveElementsFn = reactiveElements(
         document,
+        hideFurigana,
         furiganaStyle,
         hideSpoilerImage,
         navigator.standalone || window.matchMedia('(display-mode: fullscreen)').matches
@@ -331,5 +339,9 @@
   {/if}
 </div>
 {$blurListener$ ?? ''}
-{$reactiveElements$ ?? ''}
+{#await wkPromise}
+  <div style="position:fixed; top: 10px; left: 10px;">WaniKani data loading...</div>
+{:then}
+  {$reactiveElements$ ?? ''}
+{/await}
 <svelte:document bind:visibilityState />
